@@ -1,9 +1,13 @@
 #!/bin/bash
 #
-# Script by Aiman Amir
-# Telegram : @NamiaKai
+# Script by MyVPN007
+# Telegram : @myvpn007
 # ==================================================
 # 
+
+#install sudo
+apt-get -y install sudo
+apt-get -y wget
 
 # install sertifikat
 apt-get install ca-certificates
@@ -15,8 +19,8 @@ MYIP=$(wget -qO- ipv4.icanhazip.com);
 MYIP2="s/xxxxxxxxx/$MYIP/g";
 
 #regenerate hostkey
-rm -r /etc/ssh*key
-dpkg-reconfigure openssh-server
+#rm -r /etc/ssh*key
+#dpkg-reconfigure openssh-server
 
 # go to root
 cd
@@ -110,20 +114,30 @@ screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300
 cd
 
 # setting port ssh
-sed -i 's/Port 22/Port 22/g' /etc/ssh/sshd_config
-sed -i '/Port 22/a Port 80' /etc/ssh/sshd_config
+sed -i '/Port 22/a Port 143' /etc/ssh/sshd_config
+sed -i 's/Port 22/Port  22/g' /etc/ssh/sshd_config
 service ssh restart
 
-# install dropbear
+#install dropbear
 apt-get -y install dropbear
 sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
 sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=443/g' /etc/default/dropbear
-sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 443 -p 143"/g' /etc/default/dropbear
-echo "/bin/false" >> /etc/shells
-echo "/usr/sbin/nologin" >> /etc/shells
-service ssh restart
-service dropbear restart
+sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 109 -p 110"/g' /etc/default/dropbear
+echo "/bin/false" » /etc/shells
 cd
+
+# Install Dos Deflate
+apt-get -y install dnsutils dsniff
+wget https://github.com/jgmdev/ddos-deflate/archive/master.zip
+unzip master.zip
+cd ddos-deflate-master
+./install.sh
+cd
+
+# Install SSH autokick
+cd
+wget https://raw.githubusercontent.com/muchigo/VPS/master/Autokick-debian.sh
+bash Autokick-debian.sh
 
 # install fail2ban
 apt-get -y install fail2ban;service fail2ban restart
@@ -134,16 +148,25 @@ wget -O /etc/squid3/squid.conf "https://raw.github.com/blazevpn/autoscript/maste
 sed -i $MYIP2 /etc/squid3/squid.conf;
 service squid3 restart
 
-# install webmin
+#installing webmin
+wget http://www.webmin.com/jcameron-key.asc
+apt-key add jcameron-key.asc
+echo "deb http://download.webmin.com/download/repository sarge contrib" >> /etc/apt/sources.list
+echo "deb http://webmin.mirror.somersettechsolutions.co.uk/repository sarge contrib" >> /etc/apt/sources.list
+apt-get update
+apt-get -y install webmin
+#disable webmin https
+sed -i "s/ssl=1/ssl=0/g" /etc/webmin/miniserv.conf
+/etc/init.d/webmin restart
 cd
-wget -O webmin-current.deb "http://www.webmin.com/download/deb/webmin-current.deb"
-dpkg -i --force-all webmin-current.deb;
-apt-get -y -f install;
-rm /root/webmin-current.deb
-service webmin restart
+
+#bonus block torrent
+wget https://raw.githubusercontent.com/zero9911/script/master/script/torrent.sh
+chmod +x  torrent.sh
+./torrent.sh
 
 # download script
-cd /usr/bin
+cd /usr/local/bin/
 wget -O menu "https://github.com/blazevpn/autoscript/master/menu.sh"
 wget -O usernew "https://raw.github.com/blazevpn/autoscript/master/usernew.sh"
 wget -O trial "https://raw.github.com/blazevpn/autoscript/master/trial.sh"
